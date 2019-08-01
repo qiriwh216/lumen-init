@@ -3,6 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+
 class DistrictTableSeeder extends Seeder
 {
     /**
@@ -25,6 +26,7 @@ class DistrictTableSeeder extends Seeder
          */
         $dep = 3;
         $url = 'http://restapi.amap.com/v3/config/district?key=5f6d1733b6b08927f8c44f9fd70e1026&subdistrict='.$dep;
+        
         $client = new \GuzzleHttp\Client();
         $response = $client->get($url);
         if ($response->getStatusCode()==200){
