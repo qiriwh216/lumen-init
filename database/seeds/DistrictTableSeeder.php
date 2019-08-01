@@ -3,7 +3,6 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-
 class DistrictTableSeeder extends Seeder
 {
     /**
@@ -15,7 +14,8 @@ class DistrictTableSeeder extends Seeder
     {
         set_time_limit(0);
         //清空表
-        DB::truncate();
+        DB::table('district')->truncate();
+        // \App\Models\District::truncate();
         /**
             规则：设置显示下级行政区级数（行政区级别包括：国家、省/直辖市、市、区/县、乡镇/街道多级数据）
             可选值：0、1、2、3等数字，并以此类推
@@ -26,7 +26,6 @@ class DistrictTableSeeder extends Seeder
          */
         $dep = 3;
         $url = 'http://restapi.amap.com/v3/config/district?key=5f6d1733b6b08927f8c44f9fd70e1026&subdistrict='.$dep;
-        
         $client = new \GuzzleHttp\Client();
         $response = $client->get($url);
         if ($response->getStatusCode()==200){
@@ -34,7 +33,7 @@ class DistrictTableSeeder extends Seeder
             $data = $res->districts[0]->districts;
             foreach ($data as $d1){
                 //插入省
-                $province = \App\Models\District::create([
+                $province_id = DB::table('district')->insertGetId([
                     'adcode'    => $d1->adcode,
                     'name'      => $d1->name,
                     'center'    => $d1->center,
@@ -43,32 +42,32 @@ class DistrictTableSeeder extends Seeder
                 if (isset($d1->districts) && !empty($d1->districts)){
                     foreach ($d1->districts as $d2){
                         //插入市
-                        $city = \App\Models\District::create([
+                        $city_id = DB::table('district')->insertGetId([
                             'adcode'    => $d2->adcode,
                             'name'      => $d2->name,
                             'center'    => $d2->center,
                             'level'     => $d2->level,
-                            'parent_id' => $province->id
+                            'parent_id' => $province_id
                         ]);
                         if (isset($d2->districts) && !empty($d2->districts)){
                             foreach ($d2->districts as $d3){
                                 //插入区县
-                                $qu = \App\Models\District::create([
+                                $qu_id = DB::table('district')->insert([
                                     'adcode'    => $d3->adcode,
                                     'name'      => $d3->name,
                                     'center'    => $d3->center,
                                     'level'     => $d3->level,
-                                    'parent_id' => $city->id
+                                    'parent_id' => $city_id
                                 ]);
                                 if (isset($d3->districts) && !empty($d3->districts)){
                                     foreach ($d3->districts as $d4){
                                         //插入乡镇
-                                        $zhen = \App\Models\District::create([
+                                        $zhen = DB::table('district')->insert([
                                             'adcode'    => $d4->adcode,
                                             'name'      => $d4->name,
                                             'center'    => $d4->center,
                                             'level'     => $d4->level,
-                                            'parent_id' => $qu->id
+                                            'parent_id' => $qu_id
                                         ]);
                                     }
                                 }

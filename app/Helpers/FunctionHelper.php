@@ -152,132 +152,10 @@ if (!function_exists('postCurl')) {
                 )
             );
         }
-
         return $ret;
     }
 }
 
-if (!function_exists('postCurlJson')) {
-    /**
-     * 发起http 请求
-     * @param        $url
-     * @param array $body
-     * @param array $header
-     * @param string $method
-     * @return bool|mixed
-     */
-    function postCurlJson($url, $body = array(), $header = array(), $method = 'POST')
-    {
-        array_push($header, 'Content-Type: application/json');
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-        switch ($method) {
-            case 'GET':
-                curl_setopt($ch, CURLOPT_HTTPGET, true);
-                break;
-            case 'POST':
-                curl_setopt($ch, CURLOPT_POST, true);
-                break;
-            case 'PUT':
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-                break;
-            case 'DELETE':
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                break;
-        }
-
-        curl_setopt($ch, CURLOPT_USERAGENT, 'SSTS Browser/1.0');
-        curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);  //原先是FALSE，可改为2
-
-        if ($body) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-        }
-        if ($header) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }
-
-        $ret = curl_exec($ch);
-        $err = curl_error($ch);
-        $errno = curl_errno($ch);
-
-        curl_close($ch);
-
-        if ($errno) {
-            fileLog(
-                storage_path('logs/curl'),
-                sprintf(
-                    'postCurl %s %s error: %s[%s]%s header: %s%s body: %s%s',
-                    strtoupper($method),
-                    $url,
-                    $err,
-                    $errno,
-                    PHP_EOL,
-                    json_encode($header),
-                    PHP_EOL,
-                    json_encode($body),
-                    PHP_EOL
-                )
-            );
-            return false;
-        } else {
-            fileLog(
-                storage_path('logs/curl'),
-                sprintf(
-                    'postCurl %s %s%s header: %s%s body %s%s response: %s%s',
-                    strtoupper($method),
-                    $url,
-                    PHP_EOL,
-                    json_encode($header),
-                    PHP_EOL,
-                    json_encode(
-                        $body,
-                        JSON_UNESCAPED_SLASHES
-                        | JSON_UNESCAPED_UNICODE
-                        | JSON_PRETTY_PRINT
-                        | JSON_FORCE_OBJECT
-                    ),
-                    PHP_EOL,
-                    $ret,
-                    PHP_EOL
-                )
-            );
-        }
-        return $ret;
-        // 数据库存日志
-        // if ($errno) {
-        //     $saveData = [
-        //         'method' => strtoupper($method),
-        //         'url' => $url,
-        //         'header' => json_encode($header),
-        //         'body' => json_encode($body),
-        //         'error_str' => $err,
-        //         'error_no' => $errno,
-        //         'created_at' => date('Y-m-d H:i:s')
-        //     ];
-        //     dblog($saveData);
-        //     return false;
-        // }
-
-        // $saveData = [
-        //     'method' => strtoupper($method),
-        //     'url' => $url,
-        //     'header' => json_encode($header),
-        //     'body' => json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_FORCE_OBJECT),
-        //     'response' => $ret,
-        //     'created_at' => date('Y-m-d H:i:s')
-        // ];
-        // dblog($saveData);
-        // return $ret;
-
-    }
-}
 
 if (!function_exists('check_mobile')) {
     function check_mobile($mobile)
@@ -809,7 +687,7 @@ if (!function_exists('oss_get')) {
     {
         if ($ossKey == '')
             return '';
-        
+
         $ossKey = ltrim($ossKey, "/");
 
         $bucketName = App\Services\OSS::$bucketName;
@@ -870,7 +748,7 @@ if (!function_exists('curl_log')) {
                         ->insert([
                             'des' => $des,
                             'content' => $content,
-                            'created_at' => date('Y-m-d H:i:s')                 
+                            'created_at' => date('Y-m-d H:i:s')
                             ]);
         } catch (\Exception $e) {
             info($e->getMessage());
