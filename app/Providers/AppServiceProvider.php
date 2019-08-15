@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
     }
     public function boot()
     {
+        //实现打印运行的sql语句
         //sql调试
         $sql_debug = config('app.sql_debug'); //注意这里获取开关配置
         if ($sql_debug) {
